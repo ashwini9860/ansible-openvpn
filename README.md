@@ -15,4 +15,7 @@ Edit **host** file:-
 command to run:-
        
        ansible-playbook -i hosts site.yml
+       
+       
 
+##### It create a **client** directory inside your repository from where yuo run playbook inside that your .ovpn keys are save use to login for openvpm
