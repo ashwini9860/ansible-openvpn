@@ -10,9 +10,9 @@ Please modify the following things for the above mentioned post:
 
 Edit the variable file **aws_openvpn/vars/main.yml** as per your requirement,
 
-then edit host file:-
+Edit **host** file:-
 
 command to run:-
-
-   ansible-playbook -i hosts site.yml
+       
+       ansible-playbook -i hosts site.yml
 
