@@ -23,13 +23,13 @@
  - name: Create directories for clients
    file: path={{ openvpn_path}}/{{ item }} state=directory
    with_items: 
-     openvpn_clients
+     "{{ openvpn_clients }}"
 
  - name: Generate RSA keys for the Clients
    command: openssl genrsa -out {{ item }}.key {{ openvpn_key_size }} creates={{ item }}.key 
             chdir={{ openvpn_path }}/{{ item }}
    with_items:
-     openvpn_clients
+     "{{ openvpn_clients }}"
 
  - name: Set the proper permissions on all RSA keys
    file: path={{ openvpn_path }} owner=root group=root mode=600 state=directory recurse=yes
@@ -71,7 +71,7 @@
      openssl req -new -key {{ item }}.key -out {{ item }}.csr -subj "{{ openssl_request_subject }}/CN={{ item }}" creates={{ item }}.csr
             chdir={{ openvpn_path }}/{{ item }}
    with_items: 
-     openvpn_clients
+     "{{ openvpn_clients }}"
 
  - name: Generate certificates for the clients
    command: >
@@ -79,7 +79,7 @@
      creates={{ item }}.crt
             chdir={{ openvpn_path }}/{{ item }}
    with_items: 
-     openvpn_clients
+     "{{ openvpn_clients }}"
            
  - name: Generate the HMAC firewall key
    command: openvpn --genkey --secret {{ openvpn_hmac_firewall }} creates={{ openvpn_hmac_firewall }}
@@ -90,12 +90,12 @@
 
  - name: Register client certificate contents
    command: cat {{ item }}.crt chdir={{ openvpn_path }}/{{ item }}
-   with_items: openvpn_clients
+   with_items: "{{ openvpn_clients }}"
    register: openvpn_client_certificates
 
  - name: Register client key contents
    command: cat {{ item }}.key chdir={{ openvpn_path }}/{{ item }}
-   with_items: openvpn_clients
+   with_items: "{{ openvpn_clients }}"
    register: openvpn_client_keys
 
  - name: Register HMAC firewall contents
@@ -106,9 +106,9 @@
    no_log: True
    template: src=client.cnf.j2 dest={{ openvpn_path }}/{{ item[0] }}/{{ openvpn_server }}.ovpn
    with_together:
-     - openvpn_clients
-     - openvpn_client_certificates.results
-     - openvpn_client_keys.results
+     - "{{ openvpn_clients }}"
+     - "{{ openvpn_client_certificates.results }}"
+     - "{{ openvpn_client_keys.results }}"
 
  - name: Generate Diffie-Hellman parameters (this will take a while)
    command: openssl dhparam -out {{ openvpn_dhparam }} {{ openvpn_key_size }}
@@ -156,7 +156,7 @@
    no_log: True
    fetch: src={{ openvpn_path }}/{{ item[0] }}/{{ item[1] }} dest=clients/{{ item[0] }}.ovpn flat=yes
    with_nested:
-     - openvpn_clients
+     - "{{ openvpn_clients }}"
      - ["{{ openvpn_server }}.ovpn"]
 
  - pause: seconds=5
